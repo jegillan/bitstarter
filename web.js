@@ -1,6 +1,8 @@
 var express = require('express');
 
 var app = express.createServer(express.logger());
+var fs = require('fs');
+var toprint = new Buffer(30);
 
 app.get('/', function(request, response) {
   response.send('Hello World 5!');
