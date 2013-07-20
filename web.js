@@ -5,7 +5,7 @@ var fs = require('fs');
 var toprint = new Buffer(30);
 toprint  = fs.readFileSync('index.html','utf8')
 app.get('/', function(request, response) {
-  response.send('Hello World 5!');
+  response.send(toprint.toString());
 });
 
 var port = process.env.PORT || 5000;
