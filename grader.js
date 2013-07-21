@@ -30,28 +30,6 @@ var rest = require('restler');
 
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
-// var URL_DEFAULT = "http://afternoon-shore-1049.herokuapp.com";
-
-var assertURLExists = function(inURL) {
-   console.log("in URL");
-   var tmp =  '';
-     rest.get(inURL).on('complete',  function(result) {
-    if (result instanceof Error) {
-       //report error to user
-      console.log("in error"); }
-    else {
-       //process result
-/*
-      looks like this is kinda working, but needs some cleanup - actually no - why is the index json output still working?
-
-      var checkJsonURL = checkHtmlFile(result, program.checks);
-      var outJsonURL = JSON.stringify(checkJsonURL, null, 4);
-   console.log(outJsonURL); */
-
-      console.log("success"+result); }
-//      console.log("success"+result); }
-    })
-};
 
 var assertFileExists = function(infile) {
 	var instr = infile.toString();
@@ -89,8 +67,44 @@ var clone = function(fn) {
 
 var processFileUrl = function(url, file, checks){
 
-  console.log("url = " + url + " program= "  + file + " checks = "+ checks);
-};
+/* If the file is passed in, check that, otherwise create a new tmp file with the contents from the URL and check that.  
+
+This could be way more elegant - assumes that if URL is null you passed in a file.  Instead it should have checks to make sure you only passed one or the other. 
+Also probably a better way to bring the actual parsing of the file and output to a function, but this works for now!
+
+*/
+
+ if (url == null) 
+   {
+   var checkJson = checkHtmlFile(file, checks);
+   var outJson = JSON.stringify(checkJson, null, 4);
+   console.log(outJson);
+     }
+  else 
+   {
+   rest.get(url).on('complete',  function(result) 
+     {
+      if (result instanceof Error) 
+        {
+//report error to user - this could be improved
+          console.log("in error"); 
+        }
+     else 
+        {
+          fs.writeFileSync('tmp.html', result);
+          var checkJson = checkHtmlFile('tmp.html', checks);
+          var outJson = JSON.stringify(checkJson, null, 4);
+          console.log(outJson);
+        }
+      }); 
+
+
+
+
+   }
+     }
+
+
 
 if(require.main == module) {
 	program
@@ -103,9 +117,6 @@ if(require.main == module) {
 
    processFileUrl(program.url,program.file,program.checks);
 
-var checkJson = checkHtmlFile(program.file, program.checks);
-var outJson = JSON.stringify(checkJson, null, 4);
-console.log(outJson);
 
 } else {
 	exports.checkHtmlFile = checkHtmlFile;
