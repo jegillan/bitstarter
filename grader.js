@@ -25,9 +25,33 @@ References:
 var fs = require('fs');
 var program = require('commander');
 var cheerio = require('cheerio');
+var rest = require('restler');
+
+
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
+// var URL_DEFAULT = "http://afternoon-shore-1049.herokuapp.com";
 
+var assertURLExists = function(inURL) {
+   console.log("in URL");
+   var tmp =  '';
+     rest.get(inURL).on('complete',  function(result) {
+    if (result instanceof Error) {
+       //report error to user
+      console.log("in error"); }
+    else {
+       //process result
+/*
+      looks like this is kinda working, but needs some cleanup - actually no - why is the index json output still working?
+
+      var checkJsonURL = checkHtmlFile(result, program.checks);
+      var outJsonURL = JSON.stringify(checkJsonURL, null, 4);
+   console.log(outJsonURL); */
+
+      console.log("success"+result); }
+//      console.log("success"+result); }
+    })
+};
 
 var assertFileExists = function(infile) {
 	var instr = infile.toString();
@@ -63,14 +87,26 @@ var clone = function(fn) {
 	return fn.bind({});
 };
 
+var processFileUrl = function(url, file, checks){
+
+  console.log("url = " + url + " program= "  + file + " checks = "+ checks);
+};
+
 if(require.main == module) {
 	program
 		.option('-c, --checks <check_file>', 'Path to checks.json',clone(assertFileExists), CHECKSFILE_DEFAULT)
 		.option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+		.option('-u, --url  <URL>', 'URL string')
 	.parse(process.argv);
-   var checkJson = checkHtmlFile(program.file, program.checks);
-   var outJson = JSON.stringify(checkJson, null, 4);
-   console.log(outJson);
+
+// Now we want to process either the file, or the url
+
+   processFileUrl(program.url,program.file,program.checks);
+
+var checkJson = checkHtmlFile(program.file, program.checks);
+var outJson = JSON.stringify(checkJson, null, 4);
+console.log(outJson);
+
 } else {
 	exports.checkHtmlFile = checkHtmlFile;
 }
